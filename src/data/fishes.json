@@ -1,0 +1,202 @@
+[
+  {
+    "id": "fish_ro",
+    "name": "Cá rô",
+    "rarity": "Common",
+    "baseChance": 60,
+    "value": 10,
+    "minSize": 10,
+    "maxSize": 30,
+    "biomes": ["river"]
+  },
+  {
+    "id": "carp",
+    "name": "Cá chép",
+    "rarity": "Common",
+    "baseChance": 55,
+    "value": 12,
+    "minSize": 15,
+    "maxSize": 45,
+    "biomes": ["river", "lake"]
+  },
+  {
+    "id": "catfish",
+    "name": "Cá trê",
+    "rarity": "Common",
+    "baseChance": 45,
+    "value": 18,
+    "minSize": 20,
+    "maxSize": 70,
+    "biomes": ["river", "swamp"]
+  },
+  {
+    "id": "tilapia",
+    "name": "Cá rô phi",
+    "rarity": "Common",
+    "baseChance": 50,
+    "value": 15,
+    "minSize": 20,
+    "maxSize": 50,
+    "biomes": ["river", "lake"]
+  },
+  {
+    "id": "eel",
+    "name": "Lươn",
+    "rarity": "Rare",
+    "baseChance": 25,
+    "value": 60,
+    "minSize": 40,
+    "maxSize": 120,
+    "biomes": ["swamp", "river"]
+  },
+  {
+    "id": "salmon",
+    "name": "Cá hồi",
+    "rarity": "Rare",
+    "baseChance": 25,
+    "value": 50,
+    "minSize": 30,
+    "maxSize": 90,
+    "biomes": ["river", "ocean"]
+  },
+  {
+    "id": "tuna",
+    "name": "Cá ngừ",
+    "rarity": "Rare",
+    "baseChance": 20,
+    "value": 80,
+    "minSize": 70,
+    "maxSize": 200,
+    "biomes": ["ocean"]
+  },
+  {
+    "id": "octopus",
+    "name": "Bạch tuộc",
+    "rarity": "Rare",
+    "baseChance": 15,
+    "value": 120,
+    "minSize": 40,
+    "maxSize": 150,
+    "biomes": ["ocean", "deep_ocean"]
+  },
+  {
+    "id": "golden_koi",
+    "name": "Cá koi vàng",
+    "rarity": "Epic",
+    "baseChance": 8,
+    "value": 250,
+    "minSize": 50,
+    "maxSize": 120,
+    "biomes": ["lake"]
+  },
+  {
+    "id": "swordfish",
+    "name": "Cá kiếm",
+    "rarity": "Epic",
+    "baseChance": 10,
+    "value": 150,
+    "minSize": 100,
+    "maxSize": 300,
+    "biomes": ["ocean"]
+  },
+  {
+    "id": "electric_eel",
+    "name": "Lươn điện",
+    "rarity": "Epic",
+    "baseChance": 7,
+    "value": 300,
+    "minSize": 80,
+    "maxSize": 200,
+    "biomes": ["swamp"]
+  },
+  {
+    "id": "giant_squid",
+    "name": "Mực khổng lồ",
+    "rarity": "Epic",
+    "baseChance": 5,
+    "value": 450,
+    "minSize": 200,
+    "maxSize": 500,
+    "biomes": ["deep_ocean"]
+  },
+  {
+    "id": "shark",
+    "name": "Cá mập",
+    "rarity": "Legendary",
+    "baseChance": 4,
+    "value": 500,
+    "minSize": 200,
+    "maxSize": 700,
+    "biomes": ["ocean"]
+  },
+  {
+    "id": "hammerhead",
+    "name": "Cá mập đầu búa",
+    "rarity": "Legendary",
+    "baseChance": 3,
+    "value": 800,
+    "minSize": 300,
+    "maxSize": 900,
+    "biomes": ["ocean"]
+  },
+  {
+    "id": "sea_serpent",
+    "name": "Rắn biển",
+    "rarity": "Legendary",
+    "baseChance": 2,
+    "value": 1200,
+    "minSize": 400,
+    "maxSize": 1200,
+    "biomes": ["deep_ocean"]
+  },
+  {
+    "id": "phoenix_fish",
+    "name": "Cá phượng hoàng",
+    "rarity": "Legendary",
+    "baseChance": 1,
+    "value": 2000,
+    "minSize": 100,
+    "maxSize": 300,
+    "biomes": ["lava"]
+  },
+  {
+    "id": "leviathan",
+    "name": "Leviathan",
+    "rarity": "Mythic",
+    "baseChance": 1,
+    "value": 5000,
+    "minSize": 500,
+    "maxSize": 1500,
+    "biomes": ["deep_ocean"]
+  },
+  {
+    "id": "kraken",
+    "name": "Kraken",
+    "rarity": "Mythic",
+    "baseChance": 0.5,
+    "value": 8000,
+    "minSize": 1000,
+    "maxSize": 3000,
+    "biomes": ["deep_ocean"]
+  },
+  {
+    "id": "dragon_fish",
+    "name": "Long Ngư",
+    "rarity": "Mythic",
+    "baseChance": 0.3,
+    "value": 15000,
+    "minSize": 200,
+    "maxSize": 800,
+    "biomes": ["sky"]
+  },
+  {
+    "id": "void_whale",
+    "name": "Cá voi hư không",
+    "rarity": "Mythic",
+    "baseChance": 0.1,
+    "value": 50000,
+    "minSize": 5000,
+    "maxSize": 12000,
+    "biomes": ["void"]
+  }
+]

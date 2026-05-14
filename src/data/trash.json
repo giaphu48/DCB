@@ -1,0 +1,22 @@
+[
+  {
+    "id": "old_boot",
+    "name": "Giày cũ",
+    "value": 1
+  },
+  {
+    "id": "plastic_bag",
+    "name": "Túi nilon",
+    "value": 2
+  },
+  {
+    "id": "rusty_can",
+    "name": "Lon sắt rỉ",
+    "value": 3
+  },
+  {
+    "id": "broken_phone",
+    "name": "Điện thoại hỏng",
+    "value": 15
+  }
+]
