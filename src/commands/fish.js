@@ -429,7 +429,7 @@ module.exports = {
                 //
 
                 const gainedXP =
-                    fish.xp;
+                    10 + fish.xp;
 
                 //
                 // UPDATE USER

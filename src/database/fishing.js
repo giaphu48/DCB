@@ -75,10 +75,10 @@ addColumnIfNotExists(
 
 addColumnIfNotExists(
     'users',
-    'combo_count',
+    'last_gamble',
     `
     ALTER TABLE users
-    ADD COLUMN combo_count INTEGER DEFAULT 0
+ADD COLUMN last_gamble INTEGER DEFAULT 0;
     `
 );
 
