@@ -152,6 +152,8 @@ for (const file of eventFiles) {
 // READY
 //
 
+client.login(process.env.TOKEN);
+
 client.once("clientReady", async () => {
 
   console.log(
@@ -171,4 +173,4 @@ client.once("clientReady", async () => {
 // LOGIN
 //
 
-client.login(process.env.TOKEN);
+console.log(process.env.TOKEN);

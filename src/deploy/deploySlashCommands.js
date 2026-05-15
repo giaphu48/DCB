@@ -28,10 +28,6 @@ module.exports = async (client) => {
       );
 
       commands.push(command.data.toJSON());
-
-      console.log(
-        `Loaded slash command: ${command.data.name}`
-      );
     }
 
     //
