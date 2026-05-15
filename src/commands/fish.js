@@ -12,6 +12,9 @@ const {
     requiredXP
 } = require('../utils/levelSystem');
 
+const biomes =
+    require('../data/biomes.json');
+
 //
 // ACTIVE FISHING
 //
@@ -86,29 +89,6 @@ module.exports = {
         }
 
         //
-        // BIOME LEVELS
-        //
-
-        const biomeLevels = {
-
-            river: 1,
-
-            lake: 1,
-
-            ocean: 5,
-
-            swamp: 10,
-
-            lava: 15,
-
-            deep_ocean: 20,
-
-            void: 25,
-
-            sky: 30
-        };
-
-        //
         // BIOME
         //
 
@@ -121,29 +101,37 @@ module.exports = {
         if (!biome) {
 
             const unlockedBiomes =
-                Object.keys(
-                    biomeLevels
-                ).filter(
+                biomes.filter(
 
-                    biomeName =>
+                    biomeData =>
 
                         user.level >=
-                        biomeLevels[biomeName]
+                        biomeData.requiredLevel
                 );
 
-            biome = unlockedBiomes[
-                Math.floor(
-                    Math.random() *
-                    unlockedBiomes.length
-                )
-            ];
+            biome =
+                unlockedBiomes[
+                    Math.floor(
+                        Math.random() *
+                        unlockedBiomes.length
+                    )
+                ].id;
         }
+
+        //
+        // FIND BIOME
+        //
+
+        const biomeData =
+            biomes.find(
+                b => b.id === biome
+            );
 
         //
         // INVALID BIOME
         //
 
-        if (!biomeLevels[biome]) {
+        if (!biomeData) {
 
             return message.reply(
                 '❌ Biome không tồn tại'
@@ -154,16 +142,14 @@ module.exports = {
         // LEVEL CHECK
         //
 
-        const requiredLevel =
-            biomeLevels[biome];
-
         if (
-            user.level < requiredLevel
+            user.level <
+            biomeData.requiredLevel
         ) {
 
             return message.reply(
 
-                `❌ Bạn cần level **${requiredLevel}** để câu ở biome **${biome}**`
+                `❌ Bạn cần level **${biomeData.requiredLevel}** để câu ở biome **${biomeData.name}**`
 
             );
         }
@@ -266,7 +252,9 @@ module.exports = {
 
         const fishingMessage =
             await message.reply(
-                '🎣 Đang thả câu.'
+
+                `${biomeData.emoji} Đang câu tại **${biomeData.name}**...\n\n🎣 Đang thả câu.`
+
             );
 
         //
@@ -276,7 +264,9 @@ module.exports = {
         setTimeout(() => {
 
             fishingMessage.edit(
-                '🎣 Đang thả câu..'
+
+                `${biomeData.emoji} Đang câu tại **${biomeData.name}**...\n\n🎣 Đang thả câu..`
+
             ).catch(() => {});
 
         }, 1000);
@@ -284,7 +274,9 @@ module.exports = {
         setTimeout(() => {
 
             fishingMessage.edit(
-                '🎣 Đang thả câu...'
+
+                `$🎣 Đang thả câu...`
+
             ).catch(() => {});
 
         }, 2000);
@@ -318,7 +310,9 @@ module.exports = {
                 if (!fish) {
 
                     return fishingMessage.edit(
+
                         '❌ Không có cá ở biome này'
+
                     );
                 }
 
@@ -414,31 +408,8 @@ module.exports = {
                 // XP
                 //
 
-                let gainedXP = 10;
-
-                if (
-                    fish.rarity === 'Rare'
-                ) {
-                    gainedXP += 5;
-                }
-
-                if (
-                    fish.rarity === 'Epic'
-                ) {
-                    gainedXP += 15;
-                }
-
-                if (
-                    fish.rarity === 'Legendary'
-                ) {
-                    gainedXP += 40;
-                }
-
-                if (
-                    fish.rarity === 'Mythic'
-                ) {
-                    gainedXP += 100;
-                }
+                const gainedXP =
+                    fish.xp;
 
                 //
                 // UPDATE USER
@@ -594,7 +565,9 @@ module.exports = {
 
                     `💰 Worth: ${fish.worth}$\n` +
 
-                    `🌊 Biome: ${biome}\n\n` +
+                    `⭐ XP: +${gainedXP}\n` +
+
+                    `${biomeData.emoji} Biome: ${biomeData.name}\n\n` +
 
                     `🏆 Level: ${user.level}\n` +
 

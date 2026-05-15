@@ -1,0 +1,58 @@
+[
+  {
+    "id": "river",
+    "name": "River",
+    "emoji": "🏞️",
+    "requiredLevel": 1,
+    "description": "Dòng sông cơ bản"
+  },
+  {
+    "id": "lake",
+    "name": "Lake",
+    "emoji": "🏕️",
+    "requiredLevel": 1,
+    "description": "Hồ nước yên tĩnh"
+  },
+  {
+    "id": "ocean",
+    "name": "Ocean",
+    "emoji": "🌊",
+    "requiredLevel": 5,
+    "description": "Biển rộng lớn"
+  },
+  {
+    "id": "swamp",
+    "name": "Swamp",
+    "emoji": "🐊",
+    "requiredLevel": 10,
+    "description": "Đầm lầy nguy hiểm"
+  },
+  {
+    "id": "lava",
+    "name": "Lava",
+    "emoji": "🌋",
+    "requiredLevel": 15,
+    "description": "Dung nham nóng chảy"
+  },
+  {
+    "id": "deep_ocean",
+    "name": "Deep Ocean",
+    "emoji": "🌌",
+    "requiredLevel": 20,
+    "description": "Biển sâu vô tận"
+  },
+  {
+    "id": "void",
+    "name": "Void",
+    "emoji": "🕳️",
+    "requiredLevel": 25,
+    "description": "Không gian hư vô"
+  },
+  {
+    "id": "sky",
+    "name": "Sky",
+    "emoji": "☁️",
+    "requiredLevel": 30,
+    "description": "Bầu trời huyền thoại"
+  }
+]

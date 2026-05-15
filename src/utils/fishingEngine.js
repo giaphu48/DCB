@@ -169,12 +169,10 @@ function generateFish(
     });
 
     //
-    // TOTAL CHANCE
+    // TOTAL WEIGHT
     //
 
     const totalChance = modified.reduce(
-
-
 
         (acc, fish) =>
 
@@ -184,14 +182,36 @@ function generateFish(
     );
 
     //
-    // ROD CATCH BONUS
+    // REAL CATCH CHANCE
     //
 
-    const boostedChance =
+    let catchChance = 75;
 
-        totalChance +
+    //
+    // ROD BONUS
+    //
 
-        (rod.catchBonus || 0);
+    catchChance += (
+        rod.catchBonus || 0
+    );
+
+    //
+    // COMBO BONUS
+    //
+
+    catchChance += Math.min(
+        user.combo_count || 0,
+        15
+    );
+
+    //
+    // LIMIT
+    //
+
+    catchChance = Math.min(
+        catchChance,
+        95
+    );
 
     //
     // INVALID
@@ -211,62 +231,60 @@ function generateFish(
 
     console.log('\n========== FISH DEBUG ==========');
 
-console.log(
-    `👤 User: ${user.user_id || 'unknown'}`
-);
-
-console.log(
-    `🌊 Biome: ${biome}`
-);
-
-console.log(
-    `🪝 Rod: ${rod.name}`
-);
-
-console.log(
-    `🎯 Total Catch Chance: ${boostedChance.toFixed(2)}%`
-);
-
-console.log(
-    `💨 Fail Chance: ${(100 - boostedChance).toFixed(2)}%`
-);
-
-console.log(
-    `🗑️ Trash Chance: ${trashChance}%`
-);
-
-console.log(
-    `✨ Shiny Chance: ${(
-        (
-            0.01 +
-            (rod.shinyBonus || 0) / 100
-        ) * 100
-    ).toFixed(2)}%`
-);
-
-console.log('\n🐟 Fish Chances:');
-
-for (const fish of modified) {
-
-    const fishChance = (
-        fish.finalChance /
-        totalChance
-    ) * boostedChance;
+    console.log(
+        `👤 User: ${user.user_id || 'unknown'}`
+    );
 
     console.log(
-
-        `- ${fish.name}: ${fishChance.toFixed(4)}%`
-
+        `🌊 Biome: ${biome}`
     );
-}
 
-console.log('================================\n');
+    console.log(
+        `🪝 Rod: ${rod.name}`
+    );
+
+    console.log(
+        `🎯 Catch Chance: ${catchChance.toFixed(2)}%`
+    );
+
+    console.log(
+        `💨 Fail Chance: ${(100 - catchChance).toFixed(2)}%`
+    );
+
+    console.log(
+        `🗑️ Trash Chance: ${trashChance}%`
+    );
+
+    console.log(
+        `✨ Shiny Chance: ${(
+            (
+                0.01 +
+                (rod.shinyBonus || 0) / 100
+            ) * 100
+        ).toFixed(2)}%`
+    );
+
+    console.log('\n🐟 Fish Chances:');
+
+    for (const fish of modified) {
+
+        const fishChance =
+            fish.finalChance;
+
+        console.log(
+
+            `- ${fish.name}: ${fishChance.toFixed(4)}%`
+
+        );
+    }
+
+    console.log('================================\n');
 
     //
     // FAIL
     //
 
-    if (catchRoll > boostedChance) {
+    if (catchRoll > catchChance) {
 
         return {
             type: 'fail'
@@ -274,24 +292,56 @@ console.log('================================\n');
     }
 
     //
-    // WEIGHTED RANDOM
+    // TRUE PERCENT SYSTEM
     //
 
-    let rand =
-        Math.random() * totalChance;
-
-    let selected = modified[0];
+    const passedFish = [];
 
     for (const fish of modified) {
 
-        rand -= fish.finalChance;
+        const fishRoll =
+            Math.random() * 100;
 
-        if (rand <= 0) {
+        if (
+            fishRoll <= fish.finalChance
+        ) {
 
-            selected = fish;
-            break;
+            passedFish.push(fish);
         }
     }
+
+    //
+    // NO FISH PASSED
+    //
+
+    if (!passedFish.length) {
+
+        return {
+            type: 'fail'
+        };
+    }
+
+    //
+    // SORT BY RARITY
+    //
+
+    passedFish.sort(
+
+        (a, b) =>
+
+            b.finalChance -
+            a.finalChance
+    );
+
+    //
+    // PICK RAREST
+    //
+
+    const selected =
+        passedFish[
+        passedFish.length - 1
+        ];
+
 
     //
     // SIZE
@@ -303,12 +353,49 @@ console.log('================================\n');
     );
 
     //
+    // SIZE MULTIPLIER
+    //
+
+    const sizeMultiplier =
+        size / selected.maxSize;
+
+    //
     // SHINY
     //
 
     const shiny =
         Math.random() < 0.01;
 
+    //
+    // WORTH
+    //
+
+    let worth = Math.floor(
+
+        selected.value *
+
+        (0.5 + sizeMultiplier)
+    );
+
+    //
+    // SHINY BONUS
+    //
+
+    if (shiny) {
+
+        worth *= 10;
+    }
+
+    //
+    // XP
+    //
+
+    const xp = Math.floor(
+
+        selected.xp *
+
+        (0.5 + sizeMultiplier)
+    );
 
     //
     // RETURN
@@ -324,11 +411,9 @@ console.log('================================\n');
 
         shiny,
 
-        worth: shiny
+        worth,
 
-            ? selected.value * 10
-
-            : selected.value
+        xp
     };
 }
 

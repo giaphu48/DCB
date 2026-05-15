@@ -13,7 +13,8 @@ module.exports = {
     const escapedPrefix = escapeRegex(prefix);
 
     const prefixRegex = new RegExp(
-      `^(<@!?${client.user.id}>|${escapedPrefix})\\s*`
+      `^(<@!?${client.user.id}>|${escapedPrefix})\\s*`,
+      'i'
     );
 
     if (!prefixRegex.test(message.content)) return;
