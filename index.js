@@ -164,7 +164,7 @@ client.once("clientReady", async () => {
   // DEPLOY SLASH COMMANDS
   //
 
-  // await deploySlashCommands(client);
+  await deploySlashCommands(client);
   // await deployGuildSlashCommands(client, );
 
 });

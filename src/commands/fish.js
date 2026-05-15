@@ -21,6 +21,13 @@ const biomes =
 
 const activeFishing = new Set();
 
+//
+// COOLDOWN MESSAGES
+//
+
+const cooldownMessages =
+    new Set();
+
 module.exports = {
 
     name: 'fish',
@@ -35,17 +42,6 @@ module.exports = {
     async execute(message, args) {
 
         const userId = message.author.id;
-
-        //
-        // ALREADY FISHING
-        //
-
-        if (activeFishing.has(userId)) {
-
-            return message.reply(
-                '🎣 Bạn đang câu cá rồi!'
-            );
-        }
 
         //
         // GET USER
@@ -86,6 +82,103 @@ module.exports = {
                 SELECT * FROM users
                 WHERE user_id = ?
             `).get(userId);
+        }
+
+        //
+        // GET ROD
+        //
+
+        const rod = getRod(
+            user.rod || 'wooden_rod'
+        );
+
+        //
+        // COOLDOWN
+        //
+
+        const now = Date.now();
+
+        const cooldown =
+            rod.cooldown;
+
+        if (
+            now - user.last_fish <
+            cooldown
+        ) {
+
+            //
+            // ALREADY HAS CD MESSAGE
+            //
+
+            if (
+                cooldownMessages.has(userId)
+            ) {
+
+                return;
+            }
+
+            //
+            // ADD USER
+            //
+
+            cooldownMessages.add(userId);
+
+            //
+            // END TIME
+            //
+
+            const endTimeMs =
+
+                user.last_fish +
+                cooldown;
+
+            const endTime = Math.floor(
+                endTimeMs / 1000
+            );
+
+            //
+            // MESSAGE
+            //
+
+            const cooldownMessage =
+                await message.reply(
+
+                    `⏳ Bạn cần đợi <t:${endTime}:R> để câu tiếp`
+                );
+
+            //
+            // AUTO DELETE
+            //
+
+            setTimeout(() => {
+
+                cooldownMessage
+                    .delete()
+                    .catch(() => { });
+
+                //
+                // REMOVE USER
+                //
+
+                cooldownMessages.delete(
+                    userId
+                );
+
+            }, Math.max(
+                endTimeMs - now,
+                1000
+            ));
+
+            return;
+        }
+
+        //
+        // ALREADY FISHING
+        //
+
+        if (activeFishing.has(userId)) {
+
+            return;
         }
 
         //
@@ -155,96 +248,23 @@ module.exports = {
         }
 
         //
-        // GET ROD
-        //
-
-        const rod = getRod(
-            user.rod || 'wooden_rod'
-        );
-
-        //
-        // COOLDOWN
-        //
-
-        const now = Date.now();
-
-        const cooldown =
-            rod.cooldown;
-
-        if (
-            now - user.last_fish <
-            cooldown
-        ) {
-
-            let left = Math.ceil(
-
-                (
-                    cooldown -
-                    (now - user.last_fish)
-                ) / 1000
-            );
-
-            const cooldownMessage =
-                await message.reply(
-
-                    `⏳ Hãy đợi ${left}s`
-                );
-
-            const interval =
-                setInterval(async () => {
-
-                    left--;
-
-                    //
-                    // END TIMER
-                    //
-
-                    if (left <= 0) {
-
-                        clearInterval(interval);
-
-                        return cooldownMessage
-                            .delete()
-                            .catch(() => {});
-                    }
-
-                    //
-                    // PROGRESS BAR
-                    //
-
-                    const total =
-                        Math.ceil(
-                            cooldown / 1000
-                        );
-
-                    const progress =
-
-                        '🟩'.repeat(
-                            total - left
-                        ) +
-
-                        '⬛'.repeat(left);
-
-                    //
-                    // UPDATE
-                    //
-
-                    cooldownMessage.edit(
-
-                        `⏳ Hãy đợi ${left}s\n\n${progress}`
-
-                    ).catch(() => {});
-
-                }, 1000);
-
-            return;
-        }
-
-        //
         // LOCK USER
         //
 
         activeFishing.add(userId);
+
+        //
+        // START COOLDOWN NOW
+        //
+
+        db.prepare(`
+            UPDATE users
+            SET last_fish = ?
+            WHERE user_id = ?
+        `).run(
+            Date.now(),
+            userId
+        );
 
         //
         // START MESSAGE
@@ -253,7 +273,7 @@ module.exports = {
         const fishingMessage =
             await message.reply(
 
-                `${biomeData.emoji} Đang câu tại **${biomeData.name}**...\n\n🎣 Đang thả câu.`
+                `🎣 Đang thả câu.`
 
             );
 
@@ -265,9 +285,9 @@ module.exports = {
 
             fishingMessage.edit(
 
-                `${biomeData.emoji} Đang câu tại **${biomeData.name}**...\n\n🎣 Đang thả câu..`
+                `🎣 Đang thả câu..`
 
-            ).catch(() => {});
+            ).catch(() => { });
 
         }, 1000);
 
@@ -275,9 +295,9 @@ module.exports = {
 
             fishingMessage.edit(
 
-                `$🎣 Đang thả câu...`
+                `🎣 Đang thả câu...`
 
-            ).catch(() => {});
+            ).catch(() => { });
 
         }, 2000);
 
@@ -418,12 +438,10 @@ module.exports = {
                 db.prepare(`
                     UPDATE users
                     SET
-                        xp = xp + ?,
-                        last_fish = ?
+                        xp = xp + ?
                     WHERE user_id = ?
                 `).run(
                     gainedXP,
-                    Date.now(),
                     userId
                 );
 
@@ -575,7 +593,7 @@ module.exports = {
 
                     `${xpBar}`
 
-                ).catch(() => {});
+                ).catch(() => { });
 
             } catch (err) {
 
@@ -583,7 +601,7 @@ module.exports = {
 
                 fishingMessage.edit(
                     '❌ Có lỗi xảy ra khi câu cá'
-                ).catch(() => {});
+                ).catch(() => { });
 
             } finally {
 
