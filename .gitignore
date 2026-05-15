@@ -18,6 +18,10 @@ yarn-error.log*
 # Hệ thống
 .DS_Store
 Thumbs.db
+database.sqlite
+database.sqlite-shm
+database.sqlite-wal
+json.sqlite
 
 
 # Environment (thường chứa secret)
@@ -28,14 +32,19 @@ Thumbs.db
 .env.production.local
 
 # SQLite database files
+*.db
+*.db-shm
+*.db-wal
+
 *.sqlite
 *.sqlite-shm
 *.sqlite-wal
+
 *.sqlite3
-*.db
+*.sqlite3-shm
+*.sqlite3-wal
 
 # VSCode settings (nếu không muốn chia sẻ config cá nhân)
 .vscode/
-
 
 config.json
