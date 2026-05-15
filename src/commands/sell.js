@@ -1,9 +1,7 @@
 // src/commands/sell.js
 
-const db = require('../database/fishing');
-
-const fishes = require('../data/fishes.json');
-const { category } = require('./fish');
+const db =
+    require('../database/fishing');
 
 module.exports = {
 
@@ -12,25 +10,32 @@ module.exports = {
     category: 'fish',
 
     description:
-        'Bán tất cả cá trong inventory để lấy tiền',
+        'Bán tất cả item trong inventory',
 
     async execute(message) {
 
-        const userId = message.author.id;
+        const userId =
+            message.author.id;
 
+        //
         // GET INVENTORY
+        //
 
         const inventory = db.prepare(`
-            SELECT * FROM inventory
+            SELECT *
+            FROM inventory
             WHERE user_id = ?
+            AND amount > 0
         `).all(userId);
 
+        //
         // EMPTY INVENTORY
+        //
 
         if (!inventory.length) {
 
             return message.reply(
-                '❌ Bạn không có cá để bán'
+                '❌ Bạn không có gì để bán'
             );
         }
 
@@ -38,52 +43,53 @@ module.exports = {
 
         let soldCount = 0;
 
-        let skipped = 0;
-
-        // CALCULATE MONEY
+        //
+        // CALCULATE
+        //
 
         for (const item of inventory) {
 
-            const fishData = fishes.find(
-                f => f.id === item.fish_id
-            );
+            //
+            // ITEM VALUE
+            //
 
-            // INVALID FISH
+            let value =
+                item.worth || 0;
 
-            if (!fishData) {
+            //
+            // SAFETY
+            //
 
-                console.log(
-                    `[WARNING] Invalid fish_id: ${item.fish_id}`
-                );
+            if (value < 0) {
 
-                skipped++;
-
-                continue;
+                value = 0;
             }
 
-            let value = fishData.value;
+            //
+            // TOTAL
+            //
 
-            // SHINY BONUS
+            total +=
+                value * item.amount;
 
-            if (item.shiny) {
-                value *= 10;
-            }
-
-            total += value * item.amount;
-
-            soldCount += item.amount;
+            soldCount +=
+                item.amount;
         }
 
-        // NO VALID FISH
+        //
+        // INVALID
+        //
 
         if (total <= 0) {
 
             return message.reply(
-                '❌ Không có cá hợp lệ để bán'
+                '❌ Không có item hợp lệ để bán'
             );
         }
 
-        // UPDATE USER MONEY
+        //
+        // UPDATE MONEY
+        //
 
         db.prepare(`
             UPDATE users
@@ -94,41 +100,39 @@ module.exports = {
             userId
         );
 
-        // DELETE INVENTORY
+        //
+        // RESET INVENTORY
+        //
 
         db.prepare(`
-            DELETE FROM inventory
+            UPDATE inventory
+            SET amount = 0
             WHERE user_id = ?
         `).run(userId);
 
-        // GET USER MONEY
+        //
+        // GET USER
+        //
 
         const user = db.prepare(`
-            SELECT * FROM users
+            SELECT *
+            FROM users
             WHERE user_id = ?
         `).get(userId);
 
+        //
         // MESSAGE
+        //
 
-        let result =
+        return message.reply(
 
-            `💰 ${message.author} đã bán cá\n\n` +
+            `💰 ${message.author} đã bán toàn bộ inventory\n\n` +
 
-            `🐟 Số lượng: ${soldCount}\n` +
+            `📦 Số lượng item: ${soldCount}\n` +
 
             `💵 Nhận được: ${total}$\n` +
 
-            `🏦 Tổng tiền: ${user.money}$`;
-
-        // WARNING
-
-        if (skipped > 0) {
-
-            result +=
-
-                `\n\n⚠️ Bỏ qua ${skipped} cá lỗi`;
-        }
-
-        message.reply(result);
+            `🏦 Tổng tiền: ${user.money}$`
+        );
     }
 };

@@ -361,11 +361,70 @@ module.exports = {
                     fish.type === 'trash'
                 ) {
 
+                    //
+                    // CHECK INVENTORY
+                    //
+
+                    const existingTrash =
+                        db.prepare(`
+            SELECT *
+            FROM inventory
+            WHERE user_id = ?
+            AND fish_id = ?
+        `).get(
+                            userId,
+                            fish.id
+                        );
+
+                    //
+                    // UPDATE INVENTORY
+                    //
+
+                    if (existingTrash) {
+
+                        db.prepare(`
+            UPDATE inventory
+            SET amount = amount + 1
+            WHERE id = ?
+        `).run(
+                            existingTrash.id
+                        );
+
+                    } else {
+
+                        db.prepare(`
+            INSERT INTO inventory (
+                user_id,
+                fish_id,
+                fish_name,
+                rarity,
+                size,
+                worth,
+                shiny,
+                amount
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `).run(
+                            userId,
+                            fish.id,
+                            fish.name,
+                            'Trash',
+                            0,
+                            fish.value,
+                            0,
+                            1
+                        );
+                    }
+
+                    //
+                    // MESSAGE
+                    //
+
                     return fishingMessage.edit(
 
                         `🗑️ ${message.author} câu được **${fish.name}**\n\n` +
 
-                        `💵 Worth: ${fish.value}$`
+                        `💰 Worth: ${fish.value}$`
 
                     );
                 }
@@ -401,24 +460,25 @@ module.exports = {
                     );
 
                 } else {
-
                     db.prepare(`
-                        INSERT INTO inventory (
-                            user_id,
-                            fish_id,
-                            fish_name,
-                            rarity,
-                            size,
-                            shiny,
-                            amount
-                        )
-                        VALUES (?, ?, ?, ?, ?, ?, ?)
-                    `).run(
+                    INSERT INTO inventory (
+                        user_id,
+                        fish_id,
+                        fish_name,
+                        rarity,
+                        size,
+                        worth,
+                        shiny,
+                        amount
+                    )
+                    VALUES(?, ?, ?, ?, ?, ?, ?, ?)
+                        `).run(
                         userId,
                         fish.id,
                         fish.name,
                         fish.rarity,
                         fish.size,
+                        fish.worth,
                         fish.shiny ? 1 : 0,
                         1
                     );
@@ -549,7 +609,7 @@ module.exports = {
                 let rarityEmoji = '⚪';
 
                 switch (
-                    fish.rarity
+                fish.rarity
                 ) {
 
                     case 'Rare':

@@ -136,4 +136,15 @@ addColumnIfNotExists(
     `
 );
 
+addColumnIfNotExists(
+    'inventory',
+    'worth',
+    `
+    ALTER TABLE inventory
+    ADD COLUMN worth INTEGER DEFAULT 1
+    `
+);
+
+
+
 module.exports = db;
