@@ -28,6 +28,8 @@ module.exports = {
             AND amount > 0
         `).all(userId);
 
+        console.log(inventory);
+
         //
         // EMPTY INVENTORY
         //
@@ -69,8 +71,7 @@ module.exports = {
             // TOTAL
             //
 
-            total +=
-                value * item.amount;
+            total += value;
 
             soldCount +=
                 item.amount;
@@ -106,7 +107,8 @@ module.exports = {
 
         db.prepare(`
             UPDATE inventory
-            SET amount = 0
+            SET amount = 0,
+            worth = 0
             WHERE user_id = ?
         `).run(userId);
 

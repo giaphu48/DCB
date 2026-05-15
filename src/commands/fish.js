@@ -379,18 +379,21 @@ module.exports = {
                     //
                     // UPDATE INVENTORY
                     //
-
                     if (existingTrash) {
 
                         db.prepare(`
-            UPDATE inventory
-            SET amount = amount + 1
-            WHERE id = ?
-        `).run(
+                            UPDATE inventory
+                            SET
+                            amount = amount + 1,
+                                worth = worth + ?
+                                    WHERE id = ?
+                                `).run(
+                            fish.value || 0,
                             existingTrash.id
                         );
 
-                    } else {
+                    }
+                    else {
 
                         db.prepare(`
             INSERT INTO inventory (
@@ -453,32 +456,42 @@ module.exports = {
 
                     db.prepare(`
                         UPDATE inventory
-                        SET amount = amount + 1
-                        WHERE id = ?
-                    `).run(
+                        SET
+                        amount = amount + 1,
+                            worth = worth + ?
+                                WHERE id = ?
+                            `).run(
+                        fish.worth,
                         existingFish.id
                     );
 
-                } else {
+                }
+
+                //
+                // INSERT
+                //
+
+                else {
+
                     db.prepare(`
-                    INSERT INTO inventory (
-                        user_id,
-                        fish_id,
-                        fish_name,
-                        rarity,
-                        size,
-                        worth,
-                        shiny,
-                        amount
-                    )
-                    VALUES(?, ?, ?, ?, ?, ?, ?, ?)
-                        `).run(
+                    INSERT INTO inventory(
+                                user_id,
+                                fish_id,
+                                fish_name,
+                                rarity,
+                                size,
+                                worth,
+                                shiny,
+                                amount
+                            )
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?)
+                    `).run(
                         userId,
                         fish.id,
                         fish.name,
-                        fish.rarity,
-                        fish.size,
-                        fish.worth,
+                        fish.rarity || 'Trash',
+                        fish.size || 0,
+                        fish.worth || fish.value || 0,
                         fish.shiny ? 1 : 0,
                         1
                     );
