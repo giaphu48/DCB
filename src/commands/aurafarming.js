@@ -10,6 +10,8 @@ const { category } = require("./fish");
 module.exports = {
   name: "aurafarming",
 
+  aliases: ["aura", "af"],
+
   category: "fun",
 
   description:

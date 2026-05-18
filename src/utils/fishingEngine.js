@@ -1,13 +1,11 @@
 // src/utils/fishingEngine.js
 
 const fishes = require('../data/fishes.json');
-
 const rods = require('../data/rods.json');
-
 const trashItems = require('../data/trash.json');
 
 //
-// RANDOM
+// RANDOM INTEGER
 //
 
 function random(min, max) {
@@ -15,6 +13,15 @@ function random(min, max) {
     return Math.floor(
         Math.random() * (max - min + 1)
     ) + min;
+}
+
+//
+// RANDOM FLOAT
+//
+
+function randomFloat(min, max) {
+
+    return Math.random() * (max - min) + min;
 }
 
 //
@@ -45,6 +52,24 @@ function randomTrash() {
 }
 
 //
+// GENERATE SIZE
+// Slight bias toward medium sizes
+//
+
+function generateSize(min, max) {
+
+    const r =
+        (
+            Math.random() +
+            Math.random()
+        ) / 2;
+
+    return Math.floor(
+        min + (max - min) * r
+    );
+}
+
+//
 // GENERATE FISH
 //
 
@@ -53,186 +78,76 @@ function generateFish(
     biome = 'river'
 ) {
 
+    //
+    // LOAD ROD
+    //
+
     const rod = getRod(
         user.rod || 'wooden_rod'
     );
 
     //
-    // FAIL / TRASH SYSTEM
+    // BASE FAIL/TRASH
     //
 
-    let failChance = 10;
-
+    let failChance = 25;
     let trashChance = 20;
 
-    // ROD BONUS
-
-    if (rod.id === 'iron_rod') {
-
-        failChance -= 2;
-    }
-
-    if (rod.id === 'diamond_rod') {
-
-        failChance -= 5;
-
-        trashChance -= 5;
-    }
-
-    const roll = Math.random() * 100;
-
     //
-    // FAIL
+    // ROD REDUCTIONS
     //
 
-    if (roll <= failChance) {
+    failChance -= (
+        rod.failReduce || 0
+    );
 
-        return {
-            type: 'fail'
-        };
-    }
-
-    //
-    // TRASH
-    //
-
-    if (
-        roll <=
-        failChance + trashChance
-    ) {
-
-        const trash = randomTrash();
-
-        return {
-            type: 'trash',
-            ...trash
-        };
-    }
-
-    //
-    // NORMAL FISH
-    //
-
-    const availableFish = fishes.filter(
-
-        f =>
-
-            f.biomes.includes(biome) &&
-
-            (
-                !f.requiredLevel ||
-
-                user.level >= f.requiredLevel
-            )
+    trashChance -= (
+        rod.trashReduce || 0
     );
 
     //
-    // INVALID BIOME
+    // SAFETY
     //
 
-    if (!availableFish.length) {
+    failChance = Math.max(
+        0,
+        failChance
+    );
 
-        return null;
-    }
-
-    //
-    // MODIFY CHANCES
-    //
-
-    const modified = availableFish.map(fish => {
-
-        let chance = fish.baseChance;
-
-        //
-        // ROD BONUS
-        //
-
-        if (
-            fish.rarity !== 'Common'
-        ) {
-
-            chance += rod.rareBonus;
-        }
-
-        //
-        // COMBO BONUS
-        //
-
-        chance += (
-            user.combo_count || 0
-        );
-
-        return {
-            ...fish,
-            finalChance: chance
-        };
-    });
-
-    //
-    // TOTAL WEIGHT
-    //
-
-    const totalChance = modified.reduce(
-
-        (acc, fish) =>
-
-            acc + fish.finalChance,
-
-        0
+    trashChance = Math.max(
+        0,
+        trashChance
     );
 
     //
-    // REAL CATCH CHANCE
+    // INITIAL ROLL
     //
 
-    let catchChance = 75;
-
-    //
-    // ROD BONUS
-    //
-
-    catchChance += (
-        rod.catchBonus || 0
-    );
-
-    //
-    // COMBO BONUS
-    //
-
-    catchChance += Math.min(
-        user.combo_count || 0,
-        15
-    );
-
-    //
-    // LIMIT
-    //
-
-    catchChance = Math.min(
-        catchChance,
-        95
-    );
-
-    //
-    // INVALID
-    //
-
-    if (totalChance <= 0) {
-
-        return null;
-    }
-
-    //
-    // ABSOLUTE CATCH ROLL
-    //
-
-    const catchRoll =
+    const initialRoll =
         Math.random() * 100;
 
-    console.log('\n========== FISH DEBUG ==========');
+    //
+    // REAL SUCCESS RATE
+    //
+
+    const realCatchRate =
+        100 -
+        failChance -
+        trashChance;
+
+    //
+    // DEBUG HEADER
+    //
 
     console.log(
-        `👤 User: ${user.user_id || 'unknown'}`
+        '\n========== FISH DEBUG =========='
+    );
+
+    console.log(
+        `👤 User: ${
+            user.user_id ||
+            'unknown'
+        }`
     );
 
     console.log(
@@ -244,47 +159,36 @@ function generateFish(
     );
 
     console.log(
-        `🎯 Catch Chance: ${catchChance.toFixed(2)}%`
+        `🎲 Initial Roll: ${initialRoll.toFixed(2)}`
     );
 
     console.log(
-        `💨 Fail Chance: ${(100 - catchChance).toFixed(2)}%`
+        `❌ Fail Chance: ${failChance.toFixed(2)}%`
     );
 
     console.log(
-        `🗑️ Trash Chance: ${trashChance}%`
+        `🗑️ Trash Chance: ${trashChance.toFixed(2)}%`
     );
 
     console.log(
-        `✨ Shiny Chance: ${(
-            (
-                0.01 +
-                (rod.shinyBonus || 0) / 100
-            ) * 100
-        ).toFixed(2)}%`
+        `🐟 Fish Chance: ${realCatchRate.toFixed(2)}%`
     );
-
-    console.log('\n🐟 Fish Chances:');
-
-    for (const fish of modified) {
-
-        const fishChance =
-            fish.finalChance;
-
-        console.log(
-
-            `- ${fish.name}: ${fishChance.toFixed(4)}%`
-
-        );
-    }
-
-    console.log('================================\n');
 
     //
     // FAIL
     //
 
-    if (catchRoll > catchChance) {
+    if (
+        initialRoll <= failChance
+    ) {
+
+        console.log(
+            `📛 RESULT: FAIL`
+        );
+
+        console.log(
+            '================================\n'
+        );
 
         return {
             type: 'fail'
@@ -292,79 +196,290 @@ function generateFish(
     }
 
     //
-    // TRUE PERCENT SYSTEM
+    // TRASH
     //
 
-    const passedFish = [];
+    if (
+        initialRoll <=
+        failChance + trashChance
+    ) {
+
+        const trash =
+            randomTrash();
+
+        console.log(
+            `🗑️ RESULT: TRASH (${trash.name})`
+        );
+
+        console.log(
+            '================================\n'
+        );
+
+        return {
+            type: 'trash',
+            ...trash
+        };
+    }
+
+    //
+    // FILTER FISH
+    //
+
+    const availableFish =
+        fishes.filter(fish =>
+
+            //
+            // BIOME
+            //
+
+            fish.biomes.includes(
+                biome
+            ) &&
+
+            //
+            // LEVEL
+            //
+
+            (
+                !fish.requiredLevel ||
+
+                user.level >=
+                fish.requiredLevel
+            )
+        );
+
+    //
+    // NO FISH
+    //
+
+    if (
+        !availableFish.length
+    ) {
+
+        console.log(
+            `❌ No fish available`
+        );
+
+        console.log(
+            '================================\n'
+        );
+
+        return null;
+    }
+
+    //
+    // BUILD WEIGHTS
+    //
+
+    const modified =
+        availableFish.map(fish => {
+
+            //
+            // BASE WEIGHT
+            //
+
+            let weight =
+                fish.baseChance;
+
+            //
+            // RARE BONUS
+            //
+
+            if (
+                fish.rarity !==
+                'Common'
+            ) {
+
+                weight *= (
+                    1 +
+                    (
+                        rod.rareBonus ||
+                        0
+                    )
+                );
+            }
+
+            //
+            // SAFETY
+            //
+
+            weight = Math.max(
+                0.0001,
+                weight
+            );
+
+            return {
+
+                ...fish,
+
+                weight
+            };
+        });
+
+    //
+    // TOTAL WEIGHT
+    //
+
+    const totalWeight =
+        modified.reduce(
+
+            (sum, fish) =>
+
+                sum +
+                fish.weight,
+
+            0
+        );
+
+    //
+    // INVALID
+    //
+
+    if (
+        totalWeight <= 0
+    ) {
+
+        console.log(
+            `❌ Invalid total fish weight`
+        );
+
+        console.log(
+            '================================\n'
+        );
+
+        return null;
+    }
+
+    //
+    // DEBUG FISH RATES
+    //
+
+    console.log(
+        '\n🐟 Fish Rates:'
+    );
 
     for (const fish of modified) {
 
-        const fishRoll =
-            Math.random() * 100;
+        //
+        // POOL RATE
+        //
 
-        if (
-            fishRoll <= fish.finalChance
-        ) {
+        const poolPercent = (
+            fish.weight /
+            totalWeight
+        ) * 100;
 
-            passedFish.push(fish);
+        //
+        // REAL RATE
+        //
+
+        const realPercent =
+            (
+                realCatchRate / 100
+            ) *
+            (
+                fish.weight /
+                totalWeight
+            ) * 100;
+
+        //
+        // SHINY RATE
+        //
+
+        const shinyChance =
+            Math.min(
+                0.05,
+                0.01 +
+                (
+                    rod.shinyBonus || 0
+                )
+            );
+
+        const shinyPercent =
+            realPercent *
+            shinyChance;
+
+        console.log(
+
+            `- ${fish.name} `
+            + `[${fish.rarity}] `
+            + `POOL=${poolPercent.toFixed(4)}% `
+            + `REAL=${realPercent.toFixed(4)}% `
+            + `SHINY=${shinyPercent.toFixed(4)}%`
+        );
+    }
+
+    //
+    // WEIGHTED RANDOM
+    //
+
+    let roll =
+        Math.random() *
+        totalWeight;
+
+    let selected = null;
+
+    for (const fish of modified) {
+
+        roll -= fish.weight;
+
+        if (roll <= 0) {
+
+            selected = fish;
+            break;
         }
     }
 
     //
-    // NO FISH PASSED
+    // FALLBACK
     //
 
-    if (!passedFish.length) {
+    if (!selected) {
 
-        return {
-            type: 'fail'
-        };
+        selected =
+            modified[
+                modified.length - 1
+            ];
     }
-
-    //
-    // SORT BY RARITY
-    //
-
-    passedFish.sort(
-
-        (a, b) =>
-
-            b.finalChance -
-            a.finalChance
-    );
-
-    //
-    // PICK RAREST
-    //
-
-    const selected =
-        passedFish[
-        passedFish.length - 1
-        ];
-
 
     //
     // SIZE
     //
 
-    const size = random(
-        selected.minSize,
-        selected.maxSize
-    );
+    const size =
+        generateSize(
+
+            selected.minSize,
+
+            selected.maxSize
+        );
 
     //
     // SIZE MULTIPLIER
     //
 
     const sizeMultiplier =
-        size / selected.maxSize;
+        size /
+        selected.maxSize;
 
     //
     // SHINY
     //
 
+    const shinyChance =
+        Math.min(
+
+            0.05,
+
+            0.01 +
+            (
+                rod.shinyBonus || 0
+            )
+        );
+
     const shiny =
-        Math.random() < 0.01;
+        Math.random() <
+        shinyChance;
 
     //
     // WORTH
@@ -374,7 +489,10 @@ function generateFish(
 
         selected.value *
 
-        (0.5 + sizeMultiplier)
+        (
+            0.5 +
+            sizeMultiplier
+        )
     );
 
     //
@@ -387,14 +505,92 @@ function generateFish(
     }
 
     //
+    // MARKET VARIANCE
+    //
+
+    const marketMultiplier =
+        randomFloat(
+            0.9,
+            1.1
+        );
+
+    worth = Math.floor(
+        worth *
+        marketMultiplier
+    );
+
+    //
     // XP
     //
 
-    const xp = Math.floor(
+    let xp = Math.floor(
 
         selected.xp *
 
-        (0.5 + sizeMultiplier)
+        (
+            0.5 +
+            sizeMultiplier
+        )
+    );
+
+    //
+    // RARITY XP BONUS
+    //
+
+    const rarityXpBonus = {
+
+        Common: 1,
+        Uncommon: 1.2,
+        Rare: 1.5,
+        Epic: 2,
+        Legendary: 3
+    };
+
+    xp = Math.floor(
+
+        xp *
+
+        (
+            rarityXpBonus[
+                selected.rarity
+            ] || 1
+        )
+    );
+
+    //
+    // FINAL RESULT DEBUG
+    //
+
+    console.log(
+        '\n🎣 FINAL RESULT'
+    );
+
+    console.log(
+        `🐟 Fish: ${selected.name}`
+    );
+
+    console.log(
+        `⭐ Rarity: ${selected.rarity}`
+    );
+
+    console.log(
+        `📏 Size: ${size}`
+    );
+
+    console.log(
+        `✨ Shiny: ${shiny ? 'YES' : 'NO'}`
+    );
+
+    console.log(
+        `💰 Worth: ${worth}`
+    );
+
+    console.log(
+        `🧪 XP: ${xp}`
+    );
+
+    console.log(
+        '================================\n'
     );
 
     //

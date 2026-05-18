@@ -42,17 +42,17 @@
     "description": "Biển sâu vô tận"
   },
   {
-    "id": "void",
-    "name": "Void",
-    "emoji": "🕳️",
-    "requiredLevel": 25,
-    "description": "Không gian hư vô"
-  },
-  {
     "id": "sky",
     "name": "Sky",
     "emoji": "☁️",
-    "requiredLevel": 30,
+    "requiredLevel": 25,
     "description": "Bầu trời huyền thoại"
+  },
+  {
+    "id": "void",
+    "name": "Void",
+    "emoji": "🕳️",
+    "requiredLevel": 30,
+    "description": "Không gian hư vô"
   }
 ]

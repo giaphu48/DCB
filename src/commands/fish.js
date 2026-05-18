@@ -215,7 +215,7 @@ module.exports = {
         // FIND BIOME
         //
 
-        const biomeData =
+        let biomeData =
             biomes.find(
                 b => b.id === biome
             );
@@ -226,9 +226,30 @@ module.exports = {
 
         if (!biomeData) {
 
-            return message.reply(
-                '❌ Biome không tồn tại'
-            );
+            //
+            // RANDOM UNLOCKED BIOME
+            //
+
+            const unlockedBiomes =
+                biomes.filter(
+
+                    biomeData =>
+
+                        user.level >=
+                        biomeData.requiredLevel
+                );
+
+            biomeData =
+
+                unlockedBiomes[
+                Math.floor(
+                    Math.random() *
+                    unlockedBiomes.length
+                )
+                ];
+
+            biome =
+                biomeData.id;
         }
 
         //

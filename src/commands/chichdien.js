@@ -10,6 +10,8 @@ const { category } = require("./fish");
 module.exports = {
   name: "chichdien",
 
+  aliases: ["campuchia", "cam"],
+
   category: "fun",
 
   description:
